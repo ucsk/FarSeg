@@ -19,10 +19,10 @@
 
 复现精度如下。
 
-| method   | iters | bs  | card | loss    | align_corners | mIoU  | weight                                                                                                                                                                                                                                                                                                                                                                                   | log                                                                                                                                                                                                                                                                                                    |
-|----------|-------|-----|------| ------- |---------------|-------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| official | 60k   | 4   | 2    | ASFLoss | √             | 63.71 | [download](https://github.com/Z-Zheng/FarSeg/releases/download/v1.0/farseg50.pth)                                                                                                                                                                                                                                                                                                        | \                                                                                                                                                                                                                                                                                                      |
-| ours     | 60k   | 8   | 1    | ASFLoss | √             | 63.09 | [download](https://bj.bcebos.com/v1/ai-studio-online/0e0057eb768d42d7b8f3389b0114cf70f74cdf65c0a749eb8f135b37ee06306a?responseContentDisposition=attachment%3B%20filename%3Dfarseg_r50_896x896_asf_amp_60k.pdparams&authorization=bce-auth-v1%2F5cfe9a5e1454405eb2a975c43eace6ec%2F2022-09-15T08%3A01%3A37Z%2F-1%2F%2Fe663278bfc9afc49a0542e8c212ff11d06c276675050554b14d2ecd15e252add)  | [log_dir](https://github.com/ucsk/FarSeg/tree/develop/PaddleSeg/vdl_logs/) 丨[train](https://www.paddlepaddle.org.cn/paddle/visualdl/service/app/index?id=e8d4f8450274b9a0f99e89eee7d8cb71) & [val](https://www.paddlepaddle.org.cn/paddle/visualdl/service/app/index?id=866f4a62e9c52bc083c09c8fd67c6e0b) |
+| method   | iters | bs   | card | loss    | align_corners | mIoU  | weight                                                       | log                                                          |
+| -------- | ----- | ---- | ---- | ------- | ------------- | ----- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| official | 60k   | 4    | 2    | ASFLoss | √             | 63.71 | [download](https://github.com/Z-Zheng/FarSeg/releases/download/v1.0/farseg50.pth) | \                                                            |
+| ours     | 60k   | 8    | 1    | ASFLoss | √             | 63.09 | [download](https://bj.bcebos.com/v1/ai-studio-online/0e0057eb768d42d7b8f3389b0114cf70f74cdf65c0a749eb8f135b37ee06306a?responseContentDisposition=attachment%3B%20filename%3Dfarseg_r50_896x896_asf_amp_60k.pdparams&authorization=bce-auth-v1%2F5cfe9a5e1454405eb2a975c43eace6ec%2F2022-09-15T08%3A01%3A37Z%2F-1%2F%2Fe663278bfc9afc49a0542e8c212ff11d06c276675050554b14d2ecd15e252add) | [log_dir](https://github.com/ucsk/FarSeg/tree/main/PaddleSeg/vdl_logs/) 丨[train](https://www.paddlepaddle.org.cn/paddle/visualdl/service/app/index?id=e8d4f8450274b9a0f99e89eee7d8cb71) & [val](https://www.paddlepaddle.org.cn/paddle/visualdl/service/app/index?id=866f4a62e9c52bc083c09c8fd67c6e0b) |
 
 关于模型验证指标，首先使用常规方法在11644张验证集上进行，然后将前一步中的最优模型（mIoU=62.56）在原始的458张验证集图像上执行滑窗预测，计算得到最终结果（mIoU=63.09）。
 
@@ -116,7 +116,7 @@ Jupyter环境工作目录切换到`PaddleSeg/`。
 主要训练配置如下：
 
 -   模型训练步长60000，单卡训练批大小设为8；
--   优化器：SGD（lr=0.007, momentum=0.9, weight_decay=1e-4, [clip_grad_by_norm](https://github.com/ucsk/FarSeg/blob/develop/PaddleSeg/paddleseg/cvlibs/config.py#L228) ）；
+-   优化器：SGD（momentum=0.9, weight_decay=1e-4, [clip_grad_by_norm](https://github.com/ucsk/FarSeg/blob/main/PaddleSeg/paddleseg/cvlibs/config.py#L228) ）；
 -   学习率策略：多项式衰减PolynomialDecay（begin=0.007，end=0.0, power=0.9）；
 
 在终端环境中下载由X2Paddle转换得到的ResNet50预训练权重，保存在`pretrain_weights/resnet50_pth.pdparams`。
@@ -188,7 +188,7 @@ wget -O pretrain_weights/farseg_r50_896x896_asf_amp_60k.pdparams https://bj.bceb
 
 这里手动生成了`PaddleRS/normal_model/model.yml`，其中包含了使PaddleRS成功调用模型的参数。
 
-FarSeg模型迁移在这里 [paddlers/rs_models/farseg](https://github.com/ucsk/FarSeg/tree/develop/PaddleRS/paddlers/rs_models/seg/) 。
+FarSeg模型迁移在这里 [paddlers/rs_models/seg](https://github.com/ucsk/FarSeg/tree/main/PaddleRS/paddlers/rs_models/seg) 。
 
 将工作目录切换到`FarSeg/PaddleRS`。然后安装依赖，拷贝[4.2]小节下载的权重，导出部署模型。
 
@@ -219,13 +219,15 @@ FarSeg模型迁移在这里 [paddlers/rs_models/farseg](https://github.com/ucsk/
 !bash ./test_tipc/prepare.sh test_tipc/configs/seg/farseg/train_infer_python.txt lite_train_lite_infer
 ```
 
-AI Studio环境中分布式训练 [test_tipc/run_task.py](https://github.com/ucsk/FarSeg/blob/develop/PaddleRS/test_tipc/log/results.log#L6) 有时会报错“Termination signal”。本repo将运行环境切换为V100×4后未报错。
+AI Studio环境中 [TIPC分布式训练](https://github.com/ucsk/FarSeg/blob/main/PaddleRS/test_tipc/results.log#L6) 有时会报错“Termination signal”。
+
+本repo将运行环境切换为V100×4后成功运行，单卡有时也可以。
 
 ```jupyter
 !bash ./test_tipc/test_train_inference_python.sh test_tipc/configs/seg/farseg/train_infer_python.txt lite_train_lite_infer
 ```
 
-TIPC测试日志文件保存于 [test_tipc/output/results.log](https://github.com/ucsk/FarSeg/blob/develop/PaddleRS/test_tipc/results.log) 。
+TIPC测试日志文件保存于 [test_tipc/output/results.log](https://github.com/ucsk/FarSeg/blob/main/PaddleRS/test_tipc/results.log) 。
 
 ## 7. LICENSE
 
