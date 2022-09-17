@@ -1,0 +1,54 @@
+batch_size: 8
+iters: 60000
+
+train_dataset:
+  type: Dataset
+  dataset_root: ../iSAID
+  num_classes: 16
+  train_path: ../iSAID/train_list.txt
+  transforms:
+    - type: RandomHorizontalFlip
+      prob: 0.5
+    - type: RandomVerticalFlip
+      prob: 0.5
+    - type: RandomRotate90K
+      K: [0, 1, 2, 3]
+    - type: Normalize
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+  mode: train
+
+val_dataset:
+  type: Dataset
+  dataset_root: ../iSAID/valid_dir
+  num_classes: 16
+  val_path: ../iSAID/valid_dir/val_list.txt
+  transforms:
+    - type: Normalize
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+  mode: val
+
+
+model:
+  type: FarSeg
+  num_classes: 16
+  pretrained: pretrain_weights/resnet50_pth.pdparams
+
+optimizer:
+  type: sgd
+  momentum: 0.9
+  weight_decay: 0.0001
+
+lr_scheduler:
+  type: PolynomialDecay
+  learning_rate: 0.007
+  end_lr: 0
+  power: 0.9
+
+loss:
+  types:
+    - type: AnnealingSoftmaxFocalLoss
+      T_max: 10000
+      gamma: 2.0
+  coef: [1]

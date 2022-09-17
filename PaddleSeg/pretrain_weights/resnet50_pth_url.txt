@@ -1,0 +1,1 @@
+https://bj.bcebos.com/v1/ai-studio-online/ffef16b1a0004f1bba606c7540d501ea5cf116a2288742b4888cf88c64ee0f55?responseContentDisposition=attachment%3B%20filename%3Dresnet50_pth.pdparams&authorization=bce-auth-v1%2F5cfe9a5e1454405eb2a975c43eace6ec%2F2022-09-11T06%3A46%3A52Z%2F-1%2F%2F1bdd0efebc7f95167ab8bf22a434c6c449647bfa57fa814ab588e03dc8a76bbc
